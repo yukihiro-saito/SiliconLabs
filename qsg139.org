@@ -72,3 +72,87 @@ Profile / Service / Characteristic / Descriptorの詳細を表示するには、
 リストまたはデータベースのいずれかをクリックします。説明が左下のペインに表示されます。
 任意のプロファイル/サービス/特性/記述子の詳細な説明を見つけることができます。
 またはhttps://www.bluetooth.com/specifications/gatt にあります。
+
+特性は、一般に複雑なフィールド構造です。 
+GATTエディタは現在、特性内の項目を一覧表示しません。
+特性にどの項目があるか知りたい場合は、
+https://www.bluetooth.com/specifications/gatt/characteristics にアクセスしてください。
+
+GATTエディタを使用する例として、アプリケーションがデバイスの現在の時刻を照会できるようにしたいとします。
+この目的のために、A predefined Time Profileが提供される。
+これには、現在時刻サービス、次のDST変更サービス、および参照時刻更新サービスの3つのサービスが含まれます。
+最も単純な場合は、参照元とDSTの変更には関心がなく、現在の時刻のみを知りたい場合です。
+現在のタイムサービスは、[Services]で見つけることができます。
+現在の時間特性、現地時間情報特性、および参照時間情報の3つの特性が含まれています。
+このサービスをドラッグアンドドロップするだけで、データベースに追加することができます。
+
+ただし、タイムゾーン、DST設定、およびクロック参照プロパティについても知りたくないとします。
+あなたは本当に時間のみが必要だとします。
+Characteristicsはサービスの一部にしかなり得ないので、独自のサービスを定義する必要があります。
+例えばSimple Time Serviceと呼びます。
+[オプション]メニューの[新しいアイテムの作成]（次の図の1）をクリックし、
+新しいサービスを追加します。
+カスタムサービスがデータベースに表示されます。
+右下のペインで、Simple Time Service(2)に名前を変更します。
+カスタムサービス用に128ビットのUUIDが自動的に生成されます。
+今度は、あなたのSimple Time Service(3)の下に
+Current Time Characteristicをドラッグ＆ドロップできます。
+
+[値の設定]で長さを2〜10バイトに変更します。
+
+「プロパティ情報の設定」は、最初は空です。
+表示されている5つのプロパティを追加します(4)。
+リモートデバイスから特性を書き込みたい場合は、
+writeプロパティをtrueに設定することもできます。
+
+gatt.xml - データベース構造のxml形式の記述。
+
+gatt_db.h - characteristicハンドルの定義を含むヘッダファイル。
+これらの定義を参照することによって、characteristicの値を読み書きすることができます。 定義名は、GATTエディタで指定されたIDから生成されます。
+
+gatt_db.c - characteristicのデフォルト値を定義するソースファイル。
+
+Characteristicsのfield構造は定義されていないため、
+https://www.bluetooth.com/specifications/gatt/characteristics 
+に基づいて手動で追加する必要があります。
+たとえば、Current Time Characteristicsには次の構造があります。
+
+PACKSTRUCT(struct date_time_t{
+uint16 year;
+uint8 month;
+uint8 day;
+uint8 hours;
+uint8 minutes;
+uint8 seconds;
+});
+
+PACKSTRUCT(struct day_of_week_t {
+uint8 day;
+});
+
+PACKSTRUCT(struct day_date_time_t {
+struct date_time_t date_time;
+struct day_of_week_t day_of_week;
+});
+
+PACKSTRUCT(struct exact_time_256_t {
+struct day_date_time_t day_date_time;
+uint8 fractions_256;
+});
+
+PACKSTRUCT(struct current_time_t {
+struct exact_time_256_t exact_time_256;
+uint8 adjust_reason;
+});
+
+ほとんどのCharacteristicsはこれよりはるかに単純な構造を持ち、
+そのうちのいくつかは単に数値か文字列です。
+この構造体のサイズを計算すると、
+Current Time Characteristicの(値設定)の長さプロパティに一致する10バイトが得られます。
+32ビットへの構造展開を避けるためにPACKSTRUCT命令が必要です。
+
+これで、データベースのcharacteristicの値を以下の例のように変更することができます。
+struct current_time_t current_time = {{{{2016,11,25,17,43,00},{5}},0},1};
+
+gecko_cmd_gatt_server_write_attribute_value(gattdb_current_time, 0, sizeof(struct current_time_t),
+(uint8*)&current_time);
