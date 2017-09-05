@@ -152,7 +152,26 @@ Current Time Characteristicの(値設定)の長さプロパティに一致する
 32ビットへの構造展開を避けるためにPACKSTRUCT命令が必要です。
 
 これで、データベースのcharacteristicの値を以下の例のように変更することができます。
-struct current_time_t current_time = {{{{2016,11,25,17,43,00},{5}},0},1};
+struct current_time_t current_time = 
+{{{{2016,11,25,17,43,00},
+{5}},
+0},
+1};
 
 gecko_cmd_gatt_server_write_attribute_value(gattdb_current_time, 0, sizeof(struct current_time_t),
 (uint8*)&current_time);
+
+スマートフォンでデバイスに接続することで値を確認できます。
+Androidマーケット/ App Store（http://www.silabs.com/bluegeckoapp） からBlue Geckoアプリをダウンロードし、
+BLE Stack＆Profile Testメニュー（1）を選択します。
+ここでは、デバイスに接続することができます（デフォルトではEmpty Exampleという名前です）（2）、
+そしてCurrent Time characteristicを探します。
+あなたのcustom Simple Time ServiceはBluetooth SIG（Special Interest Group）によって採用された標準サービスではないため、
+未知のサービス（3）の下にあります。
+
+* Energy Profiler
+Energy Profilerはアドオンツールで、実行時にデバイスのエネルギー消費を
+簡単に測定できます。ピーク消費と平均消費を簡単に調べ、
+スリープモードの電流を確認することができます。
+
+
