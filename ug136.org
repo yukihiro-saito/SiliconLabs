@@ -1,0 +1,220 @@
+#+OPTIONS: ^:nil
+このドキュメントは、Silicon LabsのBluetoothスタックを使用してSilicon Labs Wireless Gecko製品の
+Cベースアプリケーションを開発しているすべての人にとって不可欠なリファレンスです。
+このガイドでは、Bluetoothスタックアーキテクチャ、アプリケーション開発フロー、MCUコアと周辺機器の使用法と制限、
+スタック構成オプション、およびスタックリソース使用法について説明します。
+
+* Introduction
+このドキュメントは、Silicon Labs BluetoothスタックのC開発者ガイドです。
+このドキュメントはさまざまな開発の角度をカバーしており、Bluetoothスタックを実行している
+C for Wireless Gecko製品を開発しているすべての人にとって重要な参考資料です。
+このドキュメントでは、次のトピックについて説明します。
+- Section2のApplication Development Flowでは、アプリケーション開発の流れとプロジェクト構造について説明します。
+- Section4のConfiguring the Bluetooth Stack and a Wireless Gecko Deviceでは、ライブラリを含むプロジェクトと実際のアプリケーションコードによるWireless Geckoの設定について説明します。
+- Section5のBluetooth Stack Event Handlingは、Silicon LabsのBluetooth Stackを使用して開発するすべての人にとって重要な要素です。イベントベースのアーキテクチャにおいて、アプリケーションがスタックとどのように同期して動作するかを説明しています。
+- Section6のInterruptsとSection7のWireless Gecko Resourcesは、周辺機器やチップセットのリソースについて話題に触れ、スタック使用のために予約されているもの、割り込みの処理方法、アプリケーションの為のスタックのメモリフットプリントと利用可能なメモリを含みます。
+
+** Perequisites
+このドキュメントでは、Silicon LabsのBluetooth SDK 2.3.0以降が開発マシン（Windows、MAC OSX、またはLinux）に正しくインストールされていること、
+およびクイックスタートガイドとSDKの例に精通していることを前提としています。
+また、読者はBluetooth技術についての基本的な知識が必要です。詳細については、UG104.13：アプリケーション開発の基礎：Bluetoothテクノロジを参照してください。
+
+* Application Development Flow
+次の図は、高度なファームウェア構造を示しています。開発者は、スタックの一番上にアプリケーションを作成します。
+このスタックは、Silicon Labsがプリコンパイル済みのオブジェクトファイルとして提供し、エンドデバイスのBluetooth接続を可能にします。
+
+Bluetoothスタックには、次のブロックが含まれています。
+- Bootloader … 現在、3つのBootloadeが提供されています。詳細については、「UG103.06：アプリケーション開発の基礎：ブートローディング」を参照してください。
+  - Legacy OTA（Over-the-Air）ファームウェアアップデート
+  - Legacy UART DFU（デバイスファームウェアアップデート）
+  - Gecko Bootloader 詳細については、UG266：Gecko BootloaderユーザーガイドおよびAN1086：Silicon Labs BluetoothアプリケーションでのGeckoブートローダの使用を参照してください。
+- Bluetooth Stack … link layer、汎用アクセスプロファイル、セキュリティマネージャ、アトリビュートプロトコル、および汎用アトリビュートプロファイルで構成されるBluetooth機能。
+- OTA supervisor … bootloaderの後に起動するアプリケーション。ユーザーアプリケーションが有効かどうかをチェックし、
+有効な場合はスーパーバイザがアプリケーションを起動します。アプリケーションイメージが有効でない場合、
+スーパバイザは設定されたブートローダを起動して、有効なアプリケーションイメージを受信しようとします。
+これには、従来のOTAブートローダまたはGeckoブートローダを使用する必要があります。
+
+** Application Build Flow
+プロジェクトの構築は、QSG139：Simplicity StudioのBluetoothアプリケーション開発で説明しているように、
+Bluetooth Services と Characteristics（GATT定義）を定義し、
+Silicon Labs提供のサンプルまたは空のプロジェクトテンプレートから
+アプリケーションソースコードを作成することから始まります。
+SDK v2.1.0以降には、Bluetooth SevicesとCharacteristicsを定義する2つの方法があります。
+最初のオプションはSimplicity StudioのVisual GATT Editor GUIです。
+これは、GATTを設計し、gatt_db.cとgatt_db.hを生成するためのグラフィカルなツールです。
+さらに、.xmlおよび.bgproj GATT定義ファイルをインポートできます。
+Visual GATTエディタは、Simplicity StudioプロジェクトのGATT定義と生成のためのデフォルトツールです。
+2番目のオプションは、UG118：Blue Gecko Bluetooth Profile Toolkit開発者ガイドに従って.xmlまたは.bgprojを作成し、
+GATT定義ファイルを.cおよび.hに変換するための事前コンパイル手順としてBGBuild実行可能ファイルを使用することです。
+この方法は、IAR Embedded Workbenchプロジェクトで使用されます。
+プロジェクトをコンパイルすると、オブジェクトファイルが生成され、SDKで提供されているコンパイル済みのライブラリとリンクされます。
+リンクの出力は、サポートされているワイヤレスGeckoデバイスにプログラムできるフラッシュイメージです。
+
+* Project Structure
+このセクションでは、アプリケーションプロジェクトの構造と、プロジェクトに含める必要がある必須およびオプションのリソースについて説明します。
+** Bluetooth Stack and Bootloader Libraries
+Bluetooth stack ライブラリは、
++ binbootloader.o : ブートローダイメージ（コンパイル済みレガシーOTAブートローダ）。このファイルは、EFR32xG1デバイスでのみサポートされている従来のブートローダに必要です。 v2.3.0 SDKから、すべてのEFR32デバイスをサポートする統一されたGeckoブートローダが利用できます。詳細は、「UG266：Silicon Labs Gecko Bootloader User Guide」を参照してください。
++ binstack.o : Bluetoothスタックで使用されるBluetoothスタック、スーパーバイザ、およびライブラリのバイナリイメージ。
++ stack.a : アプリケーションと共有されるBluetoothスタック、EMLIB、EMDRVのシンボルをエクスポートします。
++ bgapi.a : コア以外の機能のBGAPIコマンドを実装します。SDK v2.3.0から、すべてのプロジェクトにbgapi.aを含める必要があります。古いSDKでは、NCPアプリケーションに含める必要があります。
+
+** GATT Database
+GATT（Generic Attribute Profile）databaseは、BluetoothデバイスのBluetoothプロファイル、サービス、および特性を標準化した方法で記述したものです。
+Silicon LabsのBluetoothスタックを使用すると、GATT定義はSimplicity StudioのVisual GATT Editor GUIで直接編集したり、XMLで記述したり、ビルド前のタスクとしてBGBuild実行可能ファイルに渡したりすることができます。
+GATTデータベースの作成方法と構文の詳細については、UG118：Blue GeckoBluetooth®Smart Profile Toolkit開発者ガイドを参照してください。
+
+*** gatt_db.h
+gatt_db.hヘッダーファイルは、BGBuild.exeまたはVisual GATT Editorによって自動的に生成されたGATTデータベース構造を表しています。
+GATTの型定義は、gatt_db_def.hからgatt_db.hに自動的に組み込まれます。
+
+** EMLIB and EMDRV Peripheral Source Code
+EMLIBは、Silicon LaboratoriesのすべてのEFM32、EZR32、EFR32 MCUおよびSoC用に統一されたAPIを提供する、低レベルの周辺サポートライブラリです。
+EMDRVは、EFR32のオンチップ周辺機器用の機能固有の高性能ドライバのセットです。
+ドライバは、通常、DMAベースであり、利用可能なすべての低エネルギー機能を使用します。
+ほとんどのドライバでは、APIは同期関数と非同期関数の両方を提供します。
+
+開発者は、プロジェクトに含める周辺機器ドライバを選択できます。
+EMDRVソースコードの必要なファイルは、スタックに予約されたリソースを使用せず、
+ラジオ割り込みを最優先に割り当てることを念頭において、プロジェクトに含めることができます。
+Section6.InterruptsとSeciton7.Wireless Gecko Resourcesでは、割り込みとリソースの制約について詳しく説明しています。
+EMLIBとEMDRVの詳細については、Gecko SDK APIのドキュメントとさまざまなアプリケーションノートを参照してください。
+
+** aat.h
+AAT（Application Address Table）は、ファームウェア更新ファイル形式EBLのサポート構造（メタデータ）であり、
+アップグレードイメージ内のアプリケーションのサイズと場所を定義します。
+これは、アプリケーションイメージの最初の項目であり、アプリケーションベクタテーブルへのポインタを持っています。
+スタック管理者は、アプリケーションを呼び出す前に、アプリケーションベクタテーブルを初期化し、ベクタテーブルからスタック位置を呼び出します。
+
+AATはGBLアップグレードイメージ内でアプリケーションのサイズと場所を定義しませんが、依然として必要です。
+したがって、AATはすべてのプロジェクトの必須部分であり、アプリケーションにはaat.hヘッダーファイルが含まれている必要があります。
+
+** application_properies.c
+このファイルには、型、バージョン 、およびセキュリティなど、アプリケーションイメージに関する情報を含むアプリケーションプロパティ構造体が含まれています。
+この構造体は、Gecko Bootloader APIのapplication_properties.hに定義されています（<Simplicity Studio Gecko SDK> \ platform \ bootloader \ documentation \ Gecko_Bootloader_API_Reference \ index.htmlのGecko Bootloader APIリファレンスを参照してください）。
+あらかじめ生成されたファイルはSimplicity Studioプロジェクトに含まれており、アプリケーション固有のプロパティを含むように変更することができます。
+アプリケーションのプロパティには、Gecko Bootloader APIを使用してアクセスできます。
+以下のメンバーは、定義を変更することによって更新できます。
+
+// Version number for this application (uint32_t)
+#define BG_APP_PROPERTIES_VERSION
+// Capabilities of this application (uint32_t)
+#define BG_APP_PROPERTIES_CAPABILITIES
+// Unique ID (e.g. UUID or GUID) for the product this application is built for (uint8_t[16])
+#define BG_APP_PROPERTIES_ID
+
+OTA Supervisorを使用している場合、アプリケーションプロパティのapp.capabilities構造体メンバには、Bluetoothスタックのバージョン番号が含まれている必要があります。
+
+#define BG_APP_PROPERTIES_CAPABILITIES (BG_VERSION_MAJOR << 24) | (BG_VERSION_MINOR << 16) | (BG_VERSION_PATCH << 8)
+
+Gecko Bootloaderを使用している場合、アプリケーションのプロパティー構造は必須であり、フラッシュ内のどこにでも置くことができます。
+
+** native_gecko.h
+このファイルには2つの目的があります。
+最初に、実際のBluetoothスタックAPIと、スタックの為のコマンドとイベントが含まれています。
+次に、Bluetoothスタックに構成、イベント、およびスリープ管理のAPIを提供します。
+構成、イベント、およびスリープ管理APIについては、以下で説明します。
+
+void gecko_init(const gecko_configuration_t* config)
+
+この関数は単一の引数を取ります。 それは、gecko_configuration_t構造体へのポインタです。
+その目的は、構造体に提供されているパラメータを使用してBluetoothスタックを設定および初期化することです。
+設定オプションとgecko_init（）の使い方については、次のセクションで詳しく説明します。
+Bluetoothスタックを初期化するには、アプリケーションがgecko_init（）を呼び出す必要があります。
+
+SDK v2.3.0以降、この関数は非推奨ですが、下位互換性を維持するために機能します。
+
+void gecko_stack_init(const gecko_configuration_t* config)
+
+この関数は単一の引数を取ります。gecko_configuration_t構造体へのポインタです。
+その目的は、構造体に提供されているパラメータを使用してBluetoothスタックを設定および初期化することです。
+関数gecko_stack_init（）が呼び出されると、各スタック使用コンポーネントは個別に初期化されなければなりません。
+この分離によって、必要でないスタック構成要素を含まないことによって、メモリの最適化が可能になります。
+スタックコンポーネントを個別に初期化するには、次のAPIを使用できます。
++ gecko_bgapi_class_dfu_init（）;
++ gecko_bgapi_class_system_init（）;
++ gecko_bgapi_class_le_gap_init（）;
++ gecko_bgapi_class_le_connection_init（）;
++ gecko_bgapi_class_gatt_init（）;
++ gecko_bgapi_class_gatt_server_init（）;
++ gecko_bgapi_class_endpoint_init（）;
++ gecko_bgapi_class_hardware_init（）;
++ gecko_bgapi_class_flash_init（）;
++ gecko_bgapi_class_test_init（）;
++ gecko_bgapi_class_sm_init（）;
+
+struct gecko_cmd_packet* gecko_wait_event(void)
+
+これは、Bluetoothスタックからのイベントを待ち、イベントが受信されるまでブロックするブロック機能です。
+イベントが受信されると、gecko_cmd_packet構造体へのポインタが返されます。
+Bluetoothスタック構成でEMスリープモードが有効になっている場合、Bluetoothスタックからイベントが受信されていない場合、デバイスは自動的にEM1またはEM2モードになります。
+gecko_wait_event（）を使用すると、可能な限りデバイスが最も低電力のスリープモードにあることを確認する最も簡単な方法です。
+
+Bluetoothスタックのイベント処理については、第5章「Bluetoothスタックイベント処理」で詳しく説明しています。
+
+struct gecko_cmd_packet* gecko_peek_event(void)
+
+これは、BluetoothスタックからBluetoothイベントを要求するノンブロッキング機能です。
+イベントが要求され、イベントキューが空でない場合、gecko_cmd_packet構造体へのポインタが返されます。
+イベント・キューにイベントがない場合、NULLが戻されます。
+
+この非ブロッキングイベントリスナを使用する場合、EMスリープモードは、アプリケーションスタックによって自動的に管理されないため、
+アプリケーションコードによって管理する必要があります。スリープモードの管理はgecko_can_sleep_ms（）とgecko_sleep_for_ms（）関数で行います。
+これについては後述します。
+
+スタックのイベント処理については、第5章「Bluetoothスタックイベント処理」で詳しく説明しています。
+
+int gecko_event_pending(void)
+
+この関数は、Bluetoothスタックイベントがイベントキューに保留中であるかどうかを確認します。
+保留中のBluetoothイベントが見つかった場合、関数はgecko_peek_event（）またはgecko_wait_even_t（）のいずれかで
+イベントを処理する必要があることを示す0以外の値を返します。
+イベントが見つからない場合は、ゼロが返されます。
+
+uint32 gecko_can_sleep_ms(void)
+
+この機能は、Bluetoothスタックがスリープできる時間を決定するために使用されます。
+戻り値は、次のBluetooth操作が発生するまでスタックがスリープできるミリ秒数です。
+スリープができない場合は、ゼロが返されます。
+この関数は、非ブロッキングのgecko_peek_event（）イベント処理でのみ使用されます。
+
+uint32 gecko_sleep_for_ms(uint32 max)
+
+この関数は、単一パラメータで設定された最長時間（ミリ秒）の間、
+スタックをEMスリープ状態にするために使用されます。
+戻り値は、実際にスリープしているミリ秒数です。
+スタックが外部イベントのために目を覚ます可能性があります。
+この関数は、非ブロッキングのgecko_peek_event（）イベント処理でのみ使用されます。
+
+** InitDevice.h
+このヘッダファイルには、スタックの初期化を除き、デバイスの初期化関数が含まれています。
+例えば、初期化機能は、クロックおよび電力管理を初期化しますが、
+USART、I2C、ADC、GPIOなどの周辺ハードウェアインターフェイスも初期化します。
+Bluetoothスタックと周辺機器の初期化については、
+第4章のBluetoothスタックとワイヤレスGeckoデバイスの設定で詳しく説明しています。
+
+** Radio Board-Specific Includes
+Bluetooth SDKで提供されるいくつかの例では、LCDディスプレイや相対湿度/温度センサーなど、WSTK開発キットの特定の機能が使用されています。
+これらの機能を使用するための簡素な関数は、スターターキットを使用した素早いプロトタイプ開発のために提供されています。
+次のヘッダーファイルは、特定の無線ボード上の機能の設定を容易にします。
+
+bspconfig.h
+
+BSP（Board Support Package）ヘッダーには、無線ボード固有の設定が含まれており、
+WSTKのIOをトグルするかスターターキットのLCDディスプレイを駆動するような
+WSTK特有の機能のパラメーターとして使用されます。
+
+flashpwr.h
+
+このヘッダーファイルには、一部の無線ボード（たとえばBRD4100A）のSPIフラッシュチップを低電力モードに設定する機能が含まれています。
+これは、例えば、SPIフラッシュが低電力モードでない場合、最低のEM2、EM3、またはEM4電流に達しないため、スリープ電流測定を行う場合に便利です。
+
+pti.h / boards_pti.h
+
+PTI（Packet Trace Interface）は、Wireless Gecko SoCの内蔵ブロックで、着信および発信無線パケットを生データとしてデバッグインターフェイスにルーティングします。
+これらのパケットは、Simplicity Studioのネットワークアナライザでキャプチャして表示できます。
+Network Analyzerには、Bluetoothパケット用のデコーダがあり、Bluetoothネットワークのデバッグ、分析、測定に使用できます。
+
+PTIは、HWブロックをイネーブルするためにコード内で初期化する必要があり、
+PTIピンを対応する無線ボードのピンにルーティングする必要があります。
+
