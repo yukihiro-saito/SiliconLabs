@@ -1,0 +1,42 @@
+#+STARTUP: indent inlineimages fninline
+#+OPTIONS: ^:nil
+このドキュメントは、Silicon Labs Wireless Gecko製品用のシステムをSilicon LabsのBluetoothスタックを使用してネットワークコプロセッサー（NCP）モードで開発しているすべての人にとって不可欠なリファレンスです。
+このドキュメントでは、C言語のアプリケーション開発フローとBGToolとSimplicity Studioの使用について説明し、次にスタックに含まれているサンプルとそのカスタマイズ方法を示します。
+
+* Introduction
+Bluetooth SDKを使用すると、1つのマイクロコントローラ上でC言語でSystem-On-Chip（SoC）ファームウェアを開発できます。
+SDKはNetwork Co-Processor（NCP）システムモデルもサポートしています。
+このドキュメントでは、NCPシステムのソフトウェア開発を開始する方法について説明します。
+開発ツールとサンプルプロジェクトについて説明し、次に独自のアプリケーションを作成する際に実行する必要がある最も重要なステップを強調表示します。
+
+* SoC vs NCP System Models
+SoCシステムでは、アプリケーションコード、Bluetoothホスト、およびコントローラコードが同じワイヤレスMCU上で実行されます。
+NCPシステムでは、アプリケーションはホストMCU上で実行され、ホストおよびコントローラコードはターゲットMCU上で実行されます。
+ホストとターゲットMCUはシリアルインタフェースで通信します。ホストとターゲットの間の通信は、BGAPIというSilicon Labs独自のプロトコルで定義されています。
+物理インタフェースはUARTです。BGLibは、BGPIプロトコルのANSI Cリファレンス実装であり、NCPホストアプリケーションで使用できます。
+
+[[file:Soc vs NCP System Models.png][SoC vs NCP System Models]]
+
+* NCP Target Development
+この章では、NCPターゲットファームウェアをコンパイルおよびフラッシュするために使用できるツールを示します。
+Cベースのファームウェアをコンパイルおよびフラッシュする前に、Simplicity Studioをインストールする必要があります。
+あなたはSilicon LabsのWebサイト：http://www.silabs.com/simplicity からダウンロードすることができます
+
+Simplicity Studioをインストールする前に、WSTKとPCをUSBケーブルで接続してください。
+WSTKの左側にある白いスイッチは、AEMの位置になければなりません。
+Simplicity Studioのインストール中に、Bluetooth SDKをインストールします。
+詳細はQSG139：Simplicity Studioを使用したBluetooth開発を参照してください。
+Simplicity Studioを既にインストールしている場合は、Simplicity Studio Package ManagerからBluetooth SDKをダウンロードできます。
+それを開くには、矢印アイコンをクリックして、「Stacks」タブに移動します。最後に、Bluetooth SDKの横にある[インストール]をクリックします。
+
+[[file:update.png][update]]
+
+Cで開発するには、Simplicity Studioだけでなく、サポートされているコンパイラも必要です。
+UG136：Silicon LabsBluetooth®Cアプリケーション開発者ガイドに、サポートされているコンパイラの一覧があります。
+NCPターゲットファームウェアには、Bluetooth SDKが付属しています。このプロジェクトは、Simplicity Studio Launcherページから開くことができます。
+また、プリコンパイルされたバイナリ形式でも使用できます。Simplicity Studioは、優先SDKの関連サンプルのみを表示するので、
+以下に示すようにGecko SDK Suite：Bluetoothを最初に選択する必要があります。
+
+[[file:sdk.png][sdk]]
+
+1. 
