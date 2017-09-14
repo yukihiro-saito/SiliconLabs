@@ -460,4 +460,6 @@ AttrValueChanged_my_data(&(evt->data.evt_gatt_server_attribute_value.value));
 ..}
 break;
 #+END_SRC
-7. 
+7. これで、ホストアプリケーションを再構築できます。MinGWのビルドプロセスは、「3.2 WindowsでのNCPホストの構築」の節を参照してください。
+
+
