@@ -1,5 +1,6 @@
 #+STARTUP: indent inlineimages fninline
 #+OPTIONS: ^:nil
+#+OPTIONS: \n:t
 このドキュメントは、Silicon Labs Wireless Gecko製品用のシステムをSilicon LabsのBluetoothスタックを使用してネットワークコプロセッサー（NCP）モードで開発しているすべての人にとって不可欠なリファレンスです。
 このドキュメントでは、C言語のアプリケーション開発フローとBGToolとSimplicity Studioの使用について説明し、次にスタックに含まれているサンプルとそのカスタマイズ方法を示します。
 
@@ -39,4 +40,424 @@ NCPターゲットファームウェアには、Bluetooth SDKが付属してい�
 
 [[file:sdk.png][sdk]]
 
-1. 
+1. 作成済みのNCPターゲットファームウェアをダウンロードするには、[デモ]の下にあるの[NCP - Empty target] プロジェクトをクリックします。
+[[file:NCP - Empty target.png][NCP - Empty taget]]
+2. デフォルトでは、すべてのデモはEnergy Profilerで実行されますが、以下のようにモードのRunを選択してファームウェアを送って実行することができます。[スタート]をクリックします。
+[[file:Mode Run.png][Mode Run]]
+
+サンプルをビルドする場合は、最初にサンプルプロジェクトを作成する必要があります。
+
+1. 推奨されるSDKがGecko SDK Suite：Bluetoothであることを確認してください。
+[[file:Preferred SDK.png][Preferred SDK]]
+2. [New Project]をクリックし、Bluetooth SDKをクリックします。[[file:New Project.png][New Project]]
+3. SDKのバージョンを選んで、[Next]をクリックします。[[file:Select SDK.png][Select SDK]]
+4. [NCP target - Empty]のサンプル アプリケーションを選択し、[Next]をクリックします。[[file:Select NCP target -Empty.png][Select NCP target - Empty]]
+5. プロジェクトの名前を入力し、[Next]をクリックします。[[file:Name Project.png][Name Project]]
+6. ダイアログに表示されているボードが、接続しているボードであることを確認してください。コンパイラを選択し、[Finish]をクリックします。[[file:Select compiler.png][Select compiler]]
+7. プロジェクトの作成を終了するには、[Generate]をクリックします。生成が完了したら、[OK]をクリックします。[[file:Generate.png][Generate]]
+8. これであなたのプロジェクトはビルドとフラッシュが可能になりました。左上のメニューの（デバッグ）ボタンをクリックすると、1ステップで実行できます。フラッシュが完了したら、F8キーを押してファームウェアを起動します。
+
+** NCP Host Development
+この章では、GUIからBGAPIコマンドを送信するために使用できるBGToolインタラクティブビューを紹介し、次にSDKが提供するPCホストサンプルの構築プロセスについて説明します。
+
+*** Host - BGTool Interactive View
+BGTool UIを使用してBGAPIコマンドを発行できます。
+1. BGToolを開くには、[Tool]をクリックし、下にスクロールしてBGToolの選択をクリックし、[OK]をクリックします。[[file:BGTool.png][BGTool]]
+2. BGToolで適切なCOMポートとボーレートを設定する必要があります。JLink CDC UART Port @ 115200ボーレートを選択し、[Open]をクリックします。[[file:con][Connection]]
+3. WSTKとのUART接続が確立されると、BGAPIコマンドの発行に使用できるインタラクティブなビューが開きます。ログでNCPターゲットの応答とステータスメッセージを確認します。
+4. アドバタイズを開始するために[Start]をクリックします。[[file:Advertise.png][Advertise]]
+5. [Start]をクリックすると、NCPターゲットはBluetooth接続を受け入れます。WSTKに別のマスターデバイス（携帯など）で接続すると、ログにBGAPI通信が表示されます。[[file:Log.png][Log]]
+6. 手動でコマンドを発行することもできます。たとえば、「system hello」コマンドは、ホストとデバイス間の通信が機能していることを確認するためにいつでも使用できます。[[file:system hello.png][system hello]]
+
+a
+
+*** Building the NCP Host Example on Windows
+Bluetooth SDKには、PC用の汎用NCPホストサンプルプロジェクトが含まれています。
+この例は、Windowsまたは任意のPOSIX OSでコンパイルできます。このセクションでは、Windowsでのビルドプロセスについて説明します。
+1. gccを使用してサンプルをビルドすることができます。最初にgccの完全な実行環境であるMinGWをインストールします。あなたはここからダウンロードすることができます：
+2. MinGWのインストールフォルダにあるmingw-w64.batを起動します。次に、ディレクトリをNCP Hostのサンプルフォルダに変更します。#+BEGIN_SRC c cd c:\SiliconLabs\SimplicityStudio\v4\developer\sdks\gecko_sdk_suite\v1.1\app\bluetooth_2.4\examples_ncp_host\empty\ #+END_SRC c
+3. mingw32-make コマンドを使用してプロジェクトをビルドします。
+4. ビルド出力は、新しいexeフォルダに作成されます。cd exeでこのフォルダに移動し、empty.exeを実行します。キット接続に使用しているCOMポートを確認するメッセージが表示されます。第3章「NCPホスト開発」に示すように、JLink CDC UARTポートで使用するものを与える必要があります。
+5. WSTKとのUART接続が確立されると、次の情報が表示されます。[[file:Example on Windows.png][Example on Windows]]
+これでBluetooth経由でWSTKに接続できます。
+
+* Example Project WalkThrough
+この章では、サンプルのNCPホストおよびターゲットプロジェクトの構造について説明し、独自のプロジェクトを作成する場合に重要な部分を強調します。
+
+** NCP Target
+このセクションでは、Simplicity Studioプロジェクトであるncp-empty-targetのNCP固有の部分に焦点を当てます。一般的なプロジェクトの説明は、UG136の「Silicon LabsBluetooth®Cアプリケーション開発者ガイド」を参照してください。
+
+SoCプロジェクトとの主な違いは次のとおりです。
++ UART設定
++ スタック初期化
++ メインループ/イベント処理
+
+*** UART Configuration
+UARTは、NCPターゲットとホスト間の通信インタフェースであるため、構成する必要があります。115200ボーレート、8N1とハードウェアフロー制御を使用することをお勧めします。
+この初期化は、ncp_usart.cファイルのncp_usart_init関数によって実装されます。UARTの設定は、ncp_usart_conf.hの#definesで設定できます。設定オプションは次のとおりです。
+
+#define RETARGET_USART0
+
+この定義では、Silicon Labsキットのプロジェクトの場合、NCPインタフェースに使用されるUARTペリフェラルが選択されます。
+使用可能なUARTオプションについては、キットの該当するretargetserial.hを確認してください。
+retargetserial.hは次の場所にあります。c:¥SiliconLabs¥SimplicityStudio¥v4¥developer¥sdks¥gecko_sdk_suite¥v1.1¥hardware¥kit¥<キット名>¥config¥
+
+#define RETARGET_VCOM
+この定義が存在する場合、NCP通信は仮想COMポートに転送されます。この機能は、Silicon Labsのキットでのみ機能します。
+
+#define NCP_USART_BAUDRATE
+この定義は、UARTのボーレートを設定します。デフォルトは115200 bpsです。
+
+#define NCP_USART_STOPBITS
+この定義は、ストップビットの数を設定します。USART_Stopbits_TypeDefのオプションを使用します。デフォルトはusartStopbits1です。
+
+#define NCP_USART_PARITY
+この定義はパリティを設定します。USART_Parity_TypeDefのオプションを使用します。デフォルトはusartNoParityです。
+
+#define NCP_USART_OVS
+オーバーサンプリングモードを選択します。USART_OVS_TypeDefのオプションを使用します。デフォルトはusartOVS16です。
+
+#define NCP_USART_MVDIS
+この定義は、UART多数投票機能。デフォルトでは無効になっています
+
+#define NCP_USART_FLOW_CONTROL_ENABLED
+この定義はフロー制御を有効にするためのものです。フロー制御はデフォルトで有効になっています。
+
+#define NCP_DEEP_SLEEP_ENABLED
+この定義は、スタックのディープスリープ機能をオンに切り替えることができます。
+これはデフォルトで無効になっています。
+スリープ・モードがイネーブルの場合、ウェイクアップ・ピンを構成することも不可欠です。
+
+#define NCP_WAKEUP_PIN
+ウェイクアップ・ピンはNCPターゲットの入力ピンであるため、NCPホストはターゲットを起動できます。
+深いスリープがイネーブルされている場合は、ウェイクアップのピン番号を定義する必要があります。
+
+#define NCP_WAKEUP_PORT
+深いスリープがイネーブルの場合、ウェイクアップ・ピンのポートを定義する必要があります。
+GPIO_Port_TypeDefを使用してポートを選択します。
+
+#define NCP_SLEEP_POLARITY
+0に定義されている場合、ウェイクアップ信号はNCPターゲットを起動するためにLowになるはずです。
+
+#define NCP_HOST_WAKEUP_ENABLED
+このオプションを使用すると、BGAPIコマンドをNCPホストに送信する前に、NCPターゲットがNCPホストを起動できるようになります。したがって、この信号はNCPターゲットの出力になります。
+使用可能なGPIOピンはいずれもホストウェイクアップピンとして構成することができ、極性も設定可能です。この機能はデフォルトで無効になっています。
+
+#define NCP_HOST_WAKEUP_PORT
+NCPホストウェイクアップ機能が有効になっている場合は、ホストウェイクアップピンのポートを定義する必要があります。GPIO_Port_TypeDefを使用してポートを選択します。
+
+#define NCP_HOST_WAKEUP_PIN
+この定義は、ホストウェイクアップピンのピン番号を設定します。ncpホストウェイクアップピンはNCPターゲットの出力ピンであるため、NCPターゲットはホストを起動できます。
+#define NCP_HOST_WAKEUP_POLARITY
+0に設定されていると、ウェイクアップ信号がLowになり、NCPホストを起動します。
+NCPターゲットがSilicon Labs以外のボード上で実行されている場合、ユーザーは下の#ifと#endifセクションの間の#defineを介してUARTを設定する必要があります。
+
+#+BEGIN_SRC C
+#if !defined(FEATURE_BOARD_DETECTED)
+#define RETARGET_IRQ_NAME USART0_RX_IRQHandler /* UART IRQ Handler */
+#define RETARGET_CLK cmuClock_USART0 /* HFPER Clock */
+#define RETARGET_IRQn USART0_RX_IRQn /* IRQ number */
+#define RETARGET_UART USART0 /* UART instance */
+#define RETARGET_TX USART_Tx /* Set TX to USART_Tx */
+#define RETARGET_RX USART_Rx /* Set RX to USART_Rx */
+#define RETARGET_TX_LOCATION _USART_ROUTELOC0_TXLOC_LOC0 /* Location of of USART TX pin */
+#define RETARGET_RX_LOCATION _USART_ROUTELOC0_RXLOC_LOC0 /* Location of of USART RX pin */
+#define RETARGET_TXPORT gpioPortA /* UART transmission port */
+#define RETARGET_TXPIN 0 /* UART transmission pin */
+#define RETARGET_RXPORT gpioPortA /* UART reception port */
+#define RETARGET_RXPIN 1 /* UART reception pin */
+#define RETARGET_USART 1 /* Includes em_usart.h */
+#define RETARGET_CTS_LOCATION _USART_ROUTELOC1_CTSLOC_LOC30
+#define RETARGET_RTS_LOCATION _USART_ROUTELOC1_CTSLOC_LOC30
+#define RETARGET_CTSPORT gpioPortA
+#define RETARGET_CTSPIN 2
+#define RETARGET_RTSPORT gpioPortA
+#define RETARGET_RTSPIN 3
+#endif
+#+END_SRC
+
+*** Stack Initialization
+BluetoothスタックとアプリケーションをWireless Geckoで実行するには、gecko_init（）関数を使用してスタックを初期化する必要があります。
+NCPターゲットの場合、設定は次のようになります。
+
+#+BEGIN_SRC C
+/* Gecko configuration parameters (see gecko_configuration.h) */
+static const gecko_configuration_t config = {
+.config_flags = 0,
+#if (NCP_DEEP_SLEEP_ENABLED)
+.sleep.flags = SLEEP_FLAGS_DEEP_SLEEP_ENABLE,
+#endif
+.bluetooth.max_connections = MAX_CONNECTIONS,
+.bluetooth.max_advertisers = MAX_ADVERTISERS,
+.bluetooth.heap = bluetooth_stack_heap,
+.bluetooth.heap_size = sizeof(bluetooth_stack_heap),
+.bluetooth.sleep_clock_accuracy = 100, // ppm
+.gattdb = &bg_gattdb_data,
+.ota.flags = 0,
+.ota.device_name_len = 3,
+.ota.device_name_ptr = "OTA",
+#ifdef FEATURE_PTI_SUPPORT
+.pti = &ptiInit,
+#endif
+};
+#+END_SRC
+
+オプションについては、UG136「Silicon LabsBluetooth®Cアプリケーション開発者ガイド」に記載されています。
+
+*** Main Loop/Event Handling
+USARTとBluetoothスタックが初期化されると、メインループが開始され、ncp_handle_commands()関数によって、UARTからやってくるBGAPIコマンドがスタックに転送されます。
+次に、gecko_peek_event()は、while(evt)ループで処理されるスタックイベントをチェックします。
+ここでは、gattdb_ota_control特性へのGATT書き込みとOTA更新を有効にするconnection_closedイベントのみを処理します。
+しかし、ホストからいくつかのタスクをオフロードしたい場合、ターゲットはここで追加のスタックイベントを処理できます。
+ループの最後に、ncp_transmit_enqueue(evt)関数はローカルで処理されないイベントをキューに入れます。
+次に、ncp_transmit()関数は、すべてのイベントをキューからNCPホストに送信して処理します。
+
+#+BEGIN_SRC C
+while (1) {
+struct gecko_cmd_packet *evt;
+ncp_handle_commands();
+/* Check for stack event. */
+evt = gecko_peek_event();
+while (evt) {
+switch (BGLIB_MSG_ID(evt->header)) {
+case gecko_evt_le_connection_closed_id:
+/* Check if need to boot to dfu mode */
+if (boot_to_dfu) {
+/* Enter to DFU OTA mode */
+gecko_cmd_system_reset(2);
+}
+break;
+case gecko_evt_gatt_server_user_write_request_id:
+/* Handle OTA */
+if (evt->data.evt_gatt_server_user_write_request.characteristic == gattdb_ota_control) {
+/* Set flag to enter to OTA mode */
+boot_to_dfu = 1;
+/* Send response to Write Request */
+gecko_cmd_gatt_server_send_user_write_response(
+evt->data.evt_gatt_server_user_write_request.connection,
+gattdb_ota_control,
+bg_err_success);
+/* Close connection to enter to DFU OTA mode */
+gecko_cmd_endpoint_close(evt->data.evt_gatt_server_user_write_request.connection);
+}
+break;
+default:
+break;
+}
+ncp_transmit_enqueue(evt);
+evt = gecko_peek_event();
+}
+ncp_transmit();
+CORE_DECLARE_IRQ_STATE;
+CORE_ENTER_ATOMIC();
+gecko_sleep_for_ms(gecko_can_sleep_ms());
+CORE_EXIT_ATOMIC();
+}
+#+END_SRC
+
+*** Enabling Sleep
+ncp-empty-targetのサンプルプロジェクトでは、デフォルトでスリープモードは有効になっていません。
+スリープモードがイネーブルの場合、BGAPIコマンドをターゲットに送信する前にNCPホストがターゲットをウェイクアップできるように、ウェイクアップピンを設定することも不可欠です。
+使用可能なGPIOピンはすべてウェイクアップピンとして構成することができ、極性は設定可能です。
+次の例は、アクティブハイ極性を使用してウェイクアップピンとしてPF6ピンを構成する方法を示しています。
+
+まず、ncp_usart_conf.hでディープスリープ機能をイネーブルにします。
+
+#+BEGIN_SRC C
+#define NCP_DEEP_SLEEP_ENABLED 1
+#+END_SRC
+
+次にウェイク ピンとポートを設定します。
+
+#+BEGIN_SRC 
+#define NCP_WAKEUP_PIN 6
+#define NCP_WAKEUP_PORT gpioPortF
+#+END_SRC
+
+次に極性を設定します。ここではアクティブHighに設定しています。
+
+#+BEGIN_SRC C
+#define NCP_SLEEP_POLARITY 0
+#+END_SRC
+
+これで、設定が完了されます。GPIOと割り込みの設定はncp_usart.cによって行われます。
+
+
+** PC Host
+SDKに付属のPCホストアプリケーションプロジェクトはC言語で記述されています。
+このプロジェクトのホストサイドソースファイルは、
+c:¥SiliconLabs¥SimplicityStudio¥v4¥developer¥sdks¥gecko_sdk_suite¥v1.1¥app¥bluetooth_2.4\examples_ncp_host\empty\folder
+にあり、少数のソースファイルとヘッダーファイルで構成されています。
+
+*** Project Files
+makefile
+make build automationツールで使用できるディレクティブのセットを含む標準のmakefile。
+
+main.c
+Blue Geckoモジュールを制御するメインのアプリケーションロジック、およびBGLibの初期化とセットアップコード。
+
+app.c/app.h
+イベント処理とアプリケーションコード。
+
+uart.h
+UARTポートの初期化とRX/TXデータ転送の関数宣言は、ほとんどのプラットフォーム共通で、BGLibのメソッドとコールバックと互換性があります。
+
+uart_win.c
+Windows環境に適した、uart.hで定義されている関数の実装。
+
+uart_posix
+POSIX OS環境に適したuart.hで定義された関数の実装。
+
+infrastructure.h
+さまざまな型変換とヘルパー関数用のマクロ。
+
+*** BGAPI Supports Files
+前のセクションのファイルにはすべてのアプリケーションロジックが含まれていますが、
+BGAPIパーサとパケット生成関数を含む実際のBGLib実装コードは、他のサブフォルダの他の場所にあります。
++ c:¥SiliconLabs¥SimplicityStudio¥v4¥developer¥sdks¥gecko_sdk_suite¥v1.1¥protocol¥bluetooth_2.4¥ble_stack¥inc¥host¥
++ c:¥SiliconLabs¥SimplicityStudio¥v4¥developer¥sdks¥gecko_sdk_suite¥v1.1¥protocol¥bluetooth_2.4¥ble_stack¥inc¥common¥
++ c:¥SiliconLabs¥SimplicityStudio¥v4¥developer¥sdks¥gecko_sdk_suite¥v1.1¥protocol¥bluetooth_2.4¥ble_stack¥src¥host¥
+
+SDKのファイルの特定の配置は、BGAPIプロトコルを使用する可能性のある1つの方法ですが、異なるコードアーキテクチャでプロトコルを正しく実装する独自のライブラリコードを作成することも可能です。
+ここでの唯一の要件は、選択した実装がBGAPIコマンドパケットを正しく作成し、UART経由でモジュールに送信できることです。
+同様に、UARTを介してBGAPI応答とイベントパケットを受信し、必要なアプリケーション動作をトリガーするために必要な関数呼び出しに処理できる必要があります。
+
+ヘッダーファイルには主に#defineされたコンパイラマクロと、使用する必要のあるさまざまなAPIメソッドと列挙型に対応する名前付き定数が含まれています。
+gecko_bglib.hファイルには、基本的なパケット受信、処理、および送信機能の関数宣言も含まれています。
+
+gecko_bglib.cファイルには、パケット管理機能の実装が含まれています。
+ここで定義されているすべての関数は、ANSI Cコードのみを使用して、異なるプラットフォームでの相互互換性を最大限確保します。
+
+注:構造体パッキングでは、SDKのBGLib実装では、パケットペイロード構造を連続したメモリブロックに直接マッピングして、パースとRAMの追加使用を避けています。
+これは、BGLibヘッダーファイルで広く使用されているPACKSTRUCTマクロを使用して行います。
+正しい動作を達成するために、BGLibの移植されたバージョンが正しい構造体を一緒にパックすること（マルチバイト構造体メンバ変数上のパディングなし）を確実にすることが重要です。
+
+バイトオーダーの場合、BGAPIプロトコルはすべてのマルチバイト整数値に対してリトルエンディアンのバイト順序を使用します。
+つまり、直接マップされた構造は、ホストプラットフォームもリトルエンディアンのバイト順序を使用する場合にのみ機能します。
+これは今日の最も一般的なプラットフォームを対象としていますが、
+いくつかのビッグエンディアンプラットフォームが存在し、今日でも積極的に使用されています（Motorola 6800,68kなど）。
+
+*** Host Application Logic
+1. BGLIBの初期化
+#+BEGIN_SRC C
+BGLIB_INITIALIZE_NONBLOCK(on_message_send, uartRx, uartRxPeek);
+#+END_SRC
+2. UARTを初期化
+#+BEGIN_SRC C
+if (appSerialPortInit(argc, argv, 100) < 0) {
+printf("Non-blocking serial port init failure\n");
+exit(EXIT_FAILURE);
+}
+#+END_SRC
+3. 定義された状態になるようにNCP Targetをリセットします。チップが正常に起動すると、gecko_evt_system_boot_idイベントを受信する必要があります。
+#+BEGIN_SRC C
+gecko_cmd_system_reset(0);
+#+END_SRC
+4. メインループに行き、NCP Targetイベントを待ちます。
+#+BEGIN_SRC C
+while (1) {
+/* Check for stack event. */
+evt = gecko_peek_event();
+/* Run application and event handler. */
+appHandleEvents(evt);
+}
+#+END_SRC
+5.やってくるNCPターゲットイベントを処理します。この例では、gecko_evt_system_boot_idイベントとgecko_evt_le_connection_closed_idイベントのみが処理されます。
+#+BEGIN_SRC C
+/* Handle events */
+switch (BGLIB_MSG_ID(evt->header)) {
+case gecko_evt_system_boot_id:
+printf("System booted. Starting advertising. \n");
+/* Set advertising parameters. 100ms advertisement interval. All channels used.
+ The first two parameters are minimum and maximum advertising interval, both in
+ units of (milliseconds * 1.6). The third parameter '7' sets advertising on all channels. */
+gecko_cmd_le_gap_set_adv_parameters(160, 160, 7);
+/* Start general advertising and enable connections. */
+gecko_cmd_le_gap_set_mode(le_gap_general_discoverable, le_gap_undirected_connectable);
+break;
+case gecko_evt_le_connection_closed_id:
+/* Restart general advertising and re-enable connections after disconnection. */
+gecko_cmd_le_gap_set_mode(le_gap_general_discoverable, le_gap_undirected_connectable);
+break;
+default:
+break;
+#+END_SRC
+
+* Adding New Functionalit to the NCP Empty Example
+この章では、NCP empty sampleにカスタムBluetoothサービスを追加する方法について説明します。
+サービスは、データを受信する特性を有します。
+マスタデバイス(タブレット/スマホ)がこの特性を書き込むと、スレーブ（WSTK-NCPターゲット）はこのデータをNCPホストに転送します。
+NCPホストは、実際のデータをPCコンソールに表示します。
+
+[[file:System abstract.png][System abstract]]
+
+このアプリケーションを実装するには、次の変更が必要です。
+- 新しいサービスと特性をGATTに加える
+- 新しいGATTをホストプロジェクトとターゲットプロジェクトの両方に追加する
+- ホストプロジェクトでGATT変更イベント（gecko_evt_gatt_server_attribute_value）を処理する
+
+** Update the GATT
+GATTデータベース定義に次のサービスを追加します。
+
+#+BEGIN_SRC XML
+<!-- My service -->
+<service uuid="f6ec37db-bda1-46ec-a43a-6d86de88561d" advertise="true">
+<description>My Service</description>
+<characteristic uuid="af20fbac-2518-4998-9af7-af42540731b3" id="my_data">
+<!-- my data -->
+<properties write="true" indicate="true" />
+<value variable_length="true" length="20" type="hex" />
+</characteristic>
+</service>
+#+END_SRC
+
+GATTデータベース定義、.bgprojファイルの構文と機能の詳細なユーザーガイドについては、UG118:Blue Gecko Bluetooth Profile Toolkit開発者用ユーザーガイドを参照してください。
+正しいサービスのUUIDについては、www.bluetooth.orgを参照してください。
+
+** Update the C Target Project
+SDK 2.1.0以降を使用して生成されたCベースのプロジェクトでは、Simplicity StudioのビジュアルGATTエディタを使用してGATTデータベースを変更できます。
+詳細はQSG139:Bluetooth®Development with Simplicity Studioを参照してください。
+GATTコンテンツを変更したら、Generateをクリックしてgatt.xmlソースファイルを更新する必要があることに注意してください。
+
+[[file:GATT Editor.png][GATT Editor]]
+
+** Update the Host Project
+1. NCPホスト側でGATTハンドルを使用するには、gatt_db.hをホストプロジェクトに追加する必要があります。gatt_db.hは、Section 5.2「Update the C Target Project」の手順ですでにworkspaceに生成されています。
+2. gatt_db.hをホストプロジェクトフォルダにコピーします。
+c:\SiliconLabs\SimplicityStudio\v4\developer\stacks\ble\v2.0.0\app\bluetooth_2.0\examples_ncp_host\empty\
+3. オプション:ホストとターゲットGATTが常に同期していることを確認するには、ターゲットプロジェクトのフォルダーからgatt_db.hを組み込むようにmakefileを変更します。プロジェクトワークスペースにパスを追加します。
+#+BEGIN_SRC C
+INCLUDEPATHS += \
+;;-I../../../../app/bluetooth_2.0/examples_bgscript/wstk_bgapi \
+-I../../../../protocol/bluetooth_2.0/ble_stack/inc/common \
+-I../../../../protocol/bluetooth_2.0/ble_stack/inc/host
+#+END_SRC
+4. 次の手順では、ファイルapp.cを変更する必要があります（第6章「ファームウェアの更新」を参照）。まず、app.cにgatt_db.hを追加します。
+#+BEGIN_SRC C
+/* include GATT handles*/
+#include "gatt_db.h"
+#+END_SRC
+5. 次に、GATT変更に反応するコールバック関数を追加します。この場合、特性の内容が出力されます。
+#+BEGIN_SRC C
+void AttrValueChanged_my_data(uint8array *value)
+{
+int i;
+for (i = 0; i < value->len; i++)
+{
+printf("my_data[%d] = 0x%x \r\n",i,value->data[i]);
+}
+printf("\r\n");
+}
+#+END_SRC
+6. Switch文のcaseにgecko_evt_gatt_server_attributeイベントを追加します。
+#+BEGIN_SRC C
+case gecko_evt_gatt_server_attribute_value_id:
+/* Check if the event is because of the my_data changed by the remote GATT client */
+if ( gattdb_my_data == evt->data.evt_gatt_server_attribute_value.attribute )
+{
+/* Call my handler */
+AttrValueChanged_my_data(&(evt->data.evt_gatt_server_attribute_value.value));
+..}
+break;
+#+END_SRC
+7. 
