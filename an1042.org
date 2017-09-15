@@ -499,4 +499,9 @@ Full OTAは、ブートローダー以外のすべてを更新します。これ
 最小のOTAの利点は、ファームウェアアップデートイメージのサイズが小さくなるため、エネルギー消費を抑えながらアップデート手順を高速化できます。
 
 ** Legacy Device Firmware Update over UART
+Silicon LabsのBluetooth SDKにより、設計者はデバイスファームウェアのアップデート機能をUART経由で製品に簡単に追加できます。
+UART DFU機能は、Bluetoothスタックに組み込まれています。
+UART DFUを使用すると、完全なファームウェアアップデート（Silicon Labs Bluetoothスタック、GATTデータベース、ハードウェア構成、アプリケーションコードなど）を実行することができます。
+ただし、UART DFUを使用してブートローダ自体を更新することはできません。
 
+** 
