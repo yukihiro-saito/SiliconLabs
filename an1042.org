@@ -462,4 +462,13 @@ break;
 #+END_SRC
 7. これで、ホストアプリケーションを再構築できます。MinGWのビルドプロセスは、「3.2 WindowsでのNCPホストの構築」の節を参照してください。
 
+** Testing
+1. /exe フォルダーからホストアプリケーションを開始します
+2. PCが（UART経由で）WSTKに接続されると、WSTKはBluetoothでAdvertiseを開始します。
+3. タブレット/スマホで接続する場合は、新しく作成したmy_data特性をGATTに書き込むことができます。ここでは、Silicon Labsが提供するBlue Geckoアプリを使用できます。
+4. my_data特性（af20fbac-2518-4998-9af7 af42540731b3）を参照して、何かを書きます。データはホストアプリケーションによって出力されます。
+[[file:Test display.png][Test display]]
+
+
+
 
