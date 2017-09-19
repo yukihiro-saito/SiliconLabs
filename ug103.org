@@ -182,3 +182,38 @@ Advertiseを行っているBluetooth LE デバイスは、1つまたは複数の
 | Connectability mode | Not connectable       | Defines if the advertiser can be connected to or not                                                                                        |
 |                     | Directed Connectable  |                                                                                                                                             |
 |                     | Undirected Connectabe |                                                                                                                                             |
+
+*** Connections
+Bluetooth LE 接続では、正しいデータ配信を保証するために、紛失したデータのCRC、肯定応答、および再送信を使用することで、
+Connectionsによりアプリケーションデータを信頼性が高く堅牢な方法で送信できます。
+さらに、Bluetooth LE 接続は、周囲のRF条件を検出し適応させ、信頼性の高い物理層を提供するために、適応周波数ホッピング（AFH）を使用します。
+Connectionsはまた、データの暗号化と復号化をサポートして機密性を保証します。
+Bluetooth LE 接続は、常に、Advertise主が接続を許可するという事実を含むAdvertisementパケットを受信するスキャナによって開始される。
+次の図は、Bluetooth LE 接続の確立方法を示しています。
+
+[[file:Connections.png][Connections]]
+
+アプリケーションは、通常、次の接続パラメータを制御します。
+
+| Parameter                  | Values                          | Description                                            |
+|----------------------------+---------------------------------+--------------------------------------------------------|
+| /                          | <>                              | <>                                                     |
+|----------------------------+---------------------------------+--------------------------------------------------------|
+| hMinimum Connection        | Interval 7.5 ms                 | Minimum allowed connection interval                    |
+|----------------------------+---------------------------------+--------------------------------------------------------|
+| Maximum Connection         | Interval 4000 ms                | Maximum allowed connection interval                    |
+|----------------------------+---------------------------------+--------------------------------------------------------|
+| Connection (slave) latency | 0 to 500 (connection intervals) | The amount of connection events the slave is allowed   |
+|                            |                                 | to skip if it has no data to send.                     |
+|----------------------------+---------------------------------+--------------------------------------------------------|
+| Supervision timeout        | 100 ms to 32000 ms              | Defines how long the break in communications can be    |
+|                            |                                 | (for example due to out of range situation) before the |
+|                            |                                 | connection is dropped and an error is presented to the |
+|                            |                                 | user.                                                  |
+
+接続パラメータは、接続更新メッセージを使用して接続のライフタイム中に更新することができる。
+
+マスターが定義された接続間隔でスレーブにパケットを送信すると、接続イベント（Connection Timelineの図）が開始されます。
+スレーブは、マスターからのパケットを受信した後、150μsに応答することができます。
+スレーブが送信するデータがない場合は、スレーブ待ち時間パラメータで定義された一定数の接続イベントをスキップできます（Connection Timelineの図）。
+スーパーバイザタイムアウトによって定義された時間内にパケットがマスタまたはスレーブによって受信されない場合、接続は終了する。
