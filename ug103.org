@@ -226,4 +226,19 @@ Bluetooth LE 接続は、常に、Advertise主が接続を許可するという�
 スレーブは次の接続間隔の開始までの時間があるときにパケットを送信することができます。
 これは、肯定応答を必要としない属性プロトコル操作でのみ使用できます。
 
+** Network Topologies
+Bluetooth LE 技術におけるデバイスの役割は次のとおりです。
+- Advertiser :: Advertiseパケットをブロードキャストしますが、受信できないデバイス。接続を許可または拒否できます。
+- Sccaner :: AdvertisementsのみをListenするデバイス。それはAdvertiserに接続することができます。
+- Slave :: 1つのマスタ（BT 4.0）または複数のマスタ（BT 4.1以降）に接続されたデバイス。
+- Master :: 1つまたは複数のスレーブに接続されているデバイス。理論的には、マスターには無制限のスレーブデバイスを接続することができますが、実際にはマスターは一度に4〜20スレーブを接続できます。
+- Hybrid :: デバイスが同時にアドバタイズとスキャンを行うこと、またはマスターに接続して同時にアドバタイズまたはスキャンすることが可能です。
+ただし、これはベンダー固有であり、サポートされている正確な機能はベンダーに確認されるべきです。 Bluetooth LE Topologiesの例を以下の2つの図に示します。
+
+[[file:Bluetooth Low Energy Topologies.png][Bluetooth Low Energy Topologies]]
+
+
+
+[[file:Topology and Role Change.png][Topology and Role Change]]
+
 
