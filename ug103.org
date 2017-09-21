@@ -241,5 +241,37 @@ Bluetooth LE 技術におけるデバイスの役割は次のとおりです。
 
 [[file:Topology and Role Change.png][Topology and Role Change]]
 
+* Generic Access Profile (GAP)
+Generic Access ProfileまたはGAPは、Bluetooth Low Energy開発者が晒される最初の層の1つです。
+これは、GAPを使用して、あるデバイスが他のデバイスによって検出可能になったり、接続可能になったりする方法や、リモートデバイスを検出して接続する方法を制御するからです。
+これを簡単に説明すると、GAPは、セクション4.1の「リンク層操作」で説明されているリンク層操作へのアクセスを提供します。これは、デバイス検出、接続
+の確立および終了、ならびに接続タイミング制御を含みます。
 
+GAPは、基盤となるコントローラに特定の要件を提供するデバイスロールを定義します。
+役割により、デバイスは、送信（TX）のみ、受信（RX）のみ、またはその両方を行う無線機を持つことができます。
+- Broadcaster（TXのみ） :: advertisingイベントとブロードキャストデータを送信します。
+- Observer（RXのみ） :: Advertisingイベントとブロードキャストデータをリッスンします。
+- Peripheral（RXおよびTX） :: 常にスレーブで、接続可能でAdvertisingを出します。 Central roleのデバイスとの単一の接続を使用する単純なデバイス向けに設計されています。
+- Central（RXおよびTX） :: 常にマスターであり、advertisesしないでください。複数の接続の開始と管理を担当するデバイス向けに設計されています。
+
+デバイスは複数の役割をサポートできますが、同時に1つの役割のみを採用できます。
+GAPでは、検出、接続、および結合のためのモードと手順も定義されています。
+基本的な技術は異なる場合がありますが、用語はBluetooth Low EnergyとBR/EDRで同じです。
+
+モード: 
+- Connectable :: 接続できます。状態:接続不可 または 接続可能。
+- Discoverable :: 発見（is advertising）されます。状態:None, limited, general
+- Bondable :: 接続可能であれば、接続されたデバイスと長期的な接続を行います。State : Non-bondable, bondable
+
+手順: 
+- Name discovery :: メニューに移動して、他のデバイスの名前を見つけます。この名前は、デュアルモードデバイスのBR/EDRと共有されます。
+- Device discovery :: 接続に使用できるデバイスを検索します。
+ - デバイスのアドレスと名前を検索します。
+ - デバイスの役割を定義する。
+- Link establishment :: advertisingデバイスを選択した後、それに接続します。
+ - CONNECT_REQを送信するようにLinkレイヤに指示します。
+ - サービスの検出を実行します。
+ - デバイス認証を要求します（データ認証ではない）。
+ - サービスの利用を要求します。
+- Service discovery :: ピアデバイス上で利用可能なサービスを見つけるために、CentralおよびPeripheralロールのデバイスで使用されます。
 
