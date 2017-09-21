@@ -237,8 +237,9 @@ Bluetooth LE 技術におけるデバイスの役割は次のとおりです。
 
 [[file:Bluetooth Low Energy Topologies.png][Bluetooth Low Energy Topologies]]
 
-
+デバイスは、次の図に示すように、役割とトポロジを変更できます。
 
 [[file:Topology and Role Change.png][Topology and Role Change]]
+
 
 
