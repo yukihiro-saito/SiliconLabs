@@ -338,4 +338,44 @@ Example
 「読み取り/書き込みが許可されていません」または「認証が不十分です」というエラーが発生する可能性があります。
 
 ** Attribute Protocol Operations
+属性プロトコルはステートレスシーケンシャルプロトコルです。
+つまり、プロトコルにステートが格納されておらず、一度に1つの操作しか実行できません。
+使用可能な属性プロトコルのメソッドについては、次の表で説明しています。
 
+Attribute Protocol Methods
+| Method                               | Description                                                       | Direction        |
+|--------------------------------------+-------------------------------------------------------------------+------------------|
+| Find Information (starting handle,   | Used to discover attribute handles and their types (UUIDs)        | Client -> Server |
+| ending handle)                       |                                                                   |                  |
+|--------------------------------------+-------------------------------------------------------------------+------------------|
+| Find By Type Value (starting handle, | Returns the handles of all attributes matching the type and value | Client -> Server |
+| ending handle, type, value)          |                                                                   |                  |
+|--------------------------------------+-------------------------------------------------------------------+------------------|
+| Read By Group Type (starting handle, | Reads the value of each attribute of a given type in a range      | Client -> Server |
+| ending handle, type)                 |                                                                   |                  |
+|--------------------------------------+-------------------------------------------------------------------+------------------|
+| Read By Type (starting handle,       | Reads the value of each attribute of a given type in a range      | Client -> Server |
+| ending handle, type)                 |                                                                   |                  |
+|--------------------------------------+-------------------------------------------------------------------+------------------|
+| Read (handle)                        | Reads the value of given handle                                   | Client -> Server |
+|                                      | Maximum payload : 250 bytes                                       |                  |
+|--------------------------------------+-------------------------------------------------------------------+------------------|
+| Read Blob (handle, offset)           | Can be used to read long attributes larger than 250 bytes         | Client -> Server |
+|                                      | Maximum payload: 64 kB                                            |                  |
+|--------------------------------------+-------------------------------------------------------------------+------------------|
+| Read Multiple ([Handle]*)            | Used to read multiple values at the same time                     | Client -> Server |
+|--------------------------------------+-------------------------------------------------------------------+------------------|
+| Write (handle, value)                | Writes the value to the given handle, with no response            | Client -> Server |
+|                                      | Maximum payload: 250 bytes                                        |                  |
+|--------------------------------------+-------------------------------------------------------------------+------------------|
+| Prepare Write (handle, offset,       | Prepares a write procedure, which is queued in server             | Client -> Server |
+| value) and Execute (exec/cancel)     | until the write is executed.                                      |                  |
+|--------------------------------------+-------------------------------------------------------------------+------------------|
+| Handle Value Notification (handle,   | Server notifies client of an attribute with a new value           | Server -> Client |
+| value)                               | Maximum payload: 250 bytes                                        |                  |
+|--------------------------------------+-------------------------------------------------------------------+------------------|
+| Handle Value Indication (handle,     | Server indicates to client an attribute with a new value.         | Server -> Client |
+| value)                               | Client must confirm reception. Maximum payload: 250 bytes         |                  |
+|--------------------------------------+-------------------------------------------------------------------+------------------|
+| Error response                       | Any request can cause an error and error response                 | Server -> Client |
+|                                      | contains information about the error                              |                  |
