@@ -390,4 +390,36 @@ Link Layerは失われたパケットをまだ再送しますので、信頼性�
 
 [[file:ACK and non-ACK Data Transfer.png][ACK and non-ACK Data Transfer]]
 
+* Generic Attribute Profile (GATT)
+汎用属性プロファイル（GATT）は、属性プロトコル（ATT）の上に構築され、属性プロトコルによって転送および格納されるデータの共通フレームワークを確立します。
+GATTは、サーバーとクライアントという2つの役割を定義しています。
+GATTサーバは、属性プロトコルを介して転送されたデータを格納し、GATTクライアントからのATT要求を受け入れます。
+一方、GATTサーバは要求に対する応答を送信し、設定されると、GATTサーバ上でイベントが発生したときにGATTクライアントに通知および通知を送信します。
+GATTは、GATTサーバに含まれるデータの形式も指定します。
+属性プロトコルによって転送される属性は、サービスおよび特性としてフォーマットされます。
+サービスには、特性の集合が含まれる場合があります。
+特性には、特性値を記述する単一の値と任意の数の記述子が含まれます。
+Bluetoothプロファイルは、データが交換される構造を指定します。
+プロファイルは、プロファイルで使用されるサービスや特性などの要素を定義しますが、セキュリティと接続確立パラメータの定義も含む場合があります。
+通常、プロファイルは、心拍数モニタリングやケイデンスモニタリングなどの高レベルのユースケースを達成するために必要な1つ以上のサービスで構成されます。
+標準化されたプロファイルにより、デバイスおよびソフトウェアベンダーは、相互運用可能なデバイスおよびアプリケーションを構築することができます。
+Bluetooth SIG標準化プロファイルはプロファイル仕様で定義されています。
+これらはhttps://developer.bluetooth.org/gatt/profiles/Pages/ProfilesHome.aspx から入手できます。
+
+Services
+Servicesは、完全なユースケースではなく、バッテリ監視や温度データなど、デバイスの特定の機能を達成するために使用される1つ以上の特性で構成されたデータの集合です。
+標準化されたBluetooth SIGは、https://developer.bluetooth.org/gatt/services/Pages/ServicesHome.aspx にあるサービス仕様で定義されています。
+
+Characteristics
+Characteristicsは、（1）データおよび/または（2）制御情報を公開および/または交換するために、サービスにおいて使用される値である。
+Characteristicsはよく定義された既知の形式です。また、値にアクセスする方法、セキュリティ要件を満たす必要があるかどうか、オプションで特性値をどのように表示または解釈するかについての情報も含まれています。
+Characteristicsには、特性データの表示または通知の値または許可構成を記述する記述子も含まれます。
+標準化された特性は、特性仕様書で定義されています。
+これらはhttps://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicsHome.aspx にあります。
+
+以下の図は、GATTクライアント、GATTサーバ、サービス、特性と特性宣言、データと記述子の関係を示しています。
+
+[[file:GATT Data Structure and Operation.png][GATT Data Structure and Operation]]
+
+
 
