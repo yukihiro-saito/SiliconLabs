@@ -379,3 +379,15 @@ Attribute Protocol Methods
 |--------------------------------------+-------------------------------------------------------------------+------------------|
 | Error response                       | Any request can cause an error and error response                 | Server -> Client |
 |                                      | contains information about the error                              |                  |
+
+** Acknoledgements
+ATT操作はオプションでAcknoledgement（ACK）を要求することができます。
+これにより、アプリケーションはどのデータパケットが正常に送信されたかを知ることができ、非常に信頼性の高いアプリケーションを設計することができます。
+サーバーは、クライアントからのACKを待たなければならないため、データのスループットが影響を受けます。
+Non-ACK操作は、接続間隔内で複数の操作を実行できるため、高いスループットを必要とするアプリケーションで使用できます。
+Link Layerは失われたパケットをまだ再送しますので、信頼性には影響しませんが、アプリケーションはどのパケットが正常に送信されたかを知ることができません。
+両方の操作を次の図に示します。
+
+[[file:ACK and non-ACK Data Transfer.png][ACK and non-ACK Data Transfer]]
+
+
