@@ -79,9 +79,9 @@ Simplicity IDEパースペクティブの左上隅にある[デバッグ]をク�
 [再生]クリックして、デバイスでプロジェクトを実行します。
 
 * The GATT Editor
-すべてのBluetooth接続は、GATTクライアントとGATTサーバがあります。
-サーバーはGATTデータベースを保持しています：クライアントが読み書きできる特性の集合。
-特性はサービスにグループ化され、サービスのグループはBluetoothプロファイルを決定します。
+すべてのBluetooth接続は、GATTクライアントとGATTサーバが持っています。
+サーバーは、 クライアントが読み書きできる特性の集合であるGATTデータベースを保持しています 。
+CharacteristicsはServicesにグループ化され、ServicesのグループはBluetoothプロファイルを決定します。
 
 GATTサーバを実装する場合（通常は周辺機器上に）、GATTデータベース構造を定義する必要があります。
 この構造は実行時には変更できないため、事前に設計する必要があります。
@@ -89,7 +89,7 @@ GATTサーバを実装する場合（通常は周辺機器上に）、GATTデー
 GATTデータベースを持つことができるため、コード内にデフォルトのデータベース構造を維持することができます。
 
 GATTエディタは、独自のGATTデータベースを構築するのに役立つ使いやすいツールです。
-事前定義されたプロファイル/サービス/特性/記述子のリストが左上のペインに表示され、
+事前定義されたProfiles/Services/Characteristics/Descriptorsのリストが左上のペインに表示され、
 現在のGATTデータベース構造が右上のペインに表示されます。
 オプションメニューは、データベースペインの右側に用意されています。
 
@@ -99,16 +99,15 @@ GATTエディタは、独自のGATTデータベースを構築するのに役立
 
 Profile / Service / Characteristic / Descriptorの詳細を表示するには、
 リストまたはデータベースのいずれかをクリックします。説明が左下のペインに表示されます。
-任意のプロファイル/サービス/特性/記述子の詳細な説明を見つけることができます。
-またはhttps://www.bluetooth.com/specifications/gatt にあります。
+任意の https://www.bluetooth.com/specifications/gatt にProfile/Service/Characteristic/Descriptorの詳細な説明を見つけることができます。
 
-特性は、一般に複雑なフィールド構造です。 
+Characteristics は、一般に複雑なフィールド構造です。 
 GATTエディタは現在、特性内の項目を一覧表示しません。
 特性にどの項目があるか知りたい場合は、
 https://www.bluetooth.com/specifications/gatt/characteristics にアクセスしてください。
 
 GATTエディタを使用する例として、アプリケーションがデバイスの現在の時刻を照会できるようにしたいとします。
-この目的のために、A predefined Time Profileが提供される。
+この目的のために、A predefined Time Profileが提供されます。
 これには、現在時刻サービス、次のDST変更サービス、および参照時刻更新サービスの3つのサービスが含まれます。
 最も単純な場合は、参照元とDSTの変更には関心がなく、現在の時刻のみを知りたい場合です。
 現在のタイムサービスは、[Services]で見つけることができます。
@@ -134,18 +133,18 @@ Current Time Characteristicをドラッグ＆ドロップできます。
 リモートデバイスから特性を書き込みたい場合は、
 writeプロパティをtrueに設定することもできます。
 
-gatt.xml - データベース構造のxml形式の記述。
+- gatt.xml :: データベース構造のxml形式の記述。
 
-gatt_db.h - characteristicハンドルの定義を含むヘッダファイル。
-これらの定義を参照することによって、characteristicの値を読み書きすることができます。 定義名は、GATTエディタで指定されたIDから生成されます。
+- gatt_db.h :: characteristicハンドルの定義を含むヘッダファイル。これらの定義を参照することによって、characteristicの値を読み書きすることができます。 定義名は、GATTエディタで指定されたIDから生成されます。
 
-gatt_db.c - characteristicのデフォルト値を定義するソースファイル。
+- gatt_db.c ::  characteristicのデフォルト値を定義するソースファイル。
 
 Characteristicsのfield構造は定義されていないため、
 https://www.bluetooth.com/specifications/gatt/characteristics 
 に基づいて手動で追加する必要があります。
 たとえば、Current Time Characteristicsには次の構造があります。
 
+#+BEGIN_SRC 
 PACKSTRUCT(struct date_time_t{
 uint16 year;
 uint8 month;
@@ -154,25 +153,34 @@ uint8 hours;
 uint8 minutes;
 uint8 seconds;
 });
+#+END_SRC
 
+#+BEGIN_SRC 
 PACKSTRUCT(struct day_of_week_t {
 uint8 day;
 });
+#+END_SRC
 
+#+BEGIN_SRC 
 PACKSTRUCT(struct day_date_time_t {
 struct date_time_t date_time;
 struct day_of_week_t day_of_week;
 });
+#+END_SRC
 
+#+BEGIN_SRC 
 PACKSTRUCT(struct exact_time_256_t {
 struct day_date_time_t day_date_time;
 uint8 fractions_256;
 });
+#+END_SRC
 
+#+BEGIN_SRC 
 PACKSTRUCT(struct current_time_t {
 struct exact_time_256_t exact_time_256;
 uint8 adjust_reason;
 });
+#+END_SRC
 
 ほとんどのCharacteristicsはこれよりはるかに単純な構造を持ち、
 そのうちのいくつかは単に数値か文字列です。
@@ -181,14 +189,18 @@ Current Time Characteristicの(値設定)の長さプロパティに一致する
 32ビットへの構造展開を避けるためにPACKSTRUCT命令が必要です。
 
 これで、データベースのcharacteristicの値を以下の例のように変更することができます。
+#+BEGIN_SRC 
 struct current_time_t current_time = 
 {{{{2016,11,25,17,43,00},
 {5}},
 0},
 1};
+#+END_SRC
 
-gecko_cmd_gatt_server_write_attribute_value(gattdb_current_time, 0, sizeof(struct current_time_t),
-(uint8*)&current_time);
+#+BEGIN_SRC 
+gecko_cmd_gatt_server_write_attribute_value(gattdb_current_time, 0, sizeof(struct current_time_t),(uint8*)&current_time);
+#+END_SRC
+
 
 スマートフォンでデバイスに接続することで値を確認できます。
 Androidマーケット/ App Store（http://www.silabs.com/bluegeckoapp） からBlue Geckoアプリをダウンロードし、
