@@ -17,7 +17,22 @@
 - SOC - iBeacon :: ビーコン信号をブロードキャストするために使用します（iBeacon形式）。ビーコンは、エリアに入ったBluetooth対応デバイスに通知するために使用されるか、距離測定および測位に使用されます。
 - SOC - ThunderBoard Sense :: ThunderBoard Sense機能とThunderBoardモバイルアプリと互換性のあるアプリケーションを表示するために使用します。
 デバイスでデモをダウンロードして実行するには、デモをクリックします。次のダイアログの「モード」ドロップダウンで、「実行」を選択します。 [開始]をクリックします。
-** 
+
+** Software Examples
+ソフトウェアの例は、アプリケーション開発の出発点です。
+Silicon Labsは、例題から始め、空のプロジェクトから始めるのではなく、必要に応じて修正することをお勧めします。
+この例は、スタックが必要とするデフォルトの構成と、構築できる基本的なアプリケーション構造を提供します。
+'Empty'の例は空白ではなく、最小の開始構造を提供することに注意してください。
+デモと同じ名前のソフトウェア例はデモ機能を提供しますが、デバイスにダウンロードする前に変更することができます。
+デフォルトのプロジェクト構成を使用してソフトウェアサンプルコードを新しいプロジェクトとしてワークスペースにインポートするには、
+サンプルの名前をクリックしてSimplicity Studio IDEを開きます。
+サンプルプロジェクトをビルドするには、Simplicity IDEパースペクティブの左上隅にあるDebugをクリックします。
+デバッグパースペクティブが開きます。 Playをクリックして、デバイスでプロジェクトを実行します。
+構成が異なるプロジェクトを作成するには、Launcher perspectiveのDemo列の上にある「新規プロジェクト」をクリックし、次の「アプリケーション開発の基礎」で説明するように進めます。
+
+注 : EFR32xG12以降のサンプルには、Silicon Labs Geckoブートローダの例、NCP target - Swiched Multiprotocol、SOC - Switched Multiprotocol Joining Deviceなどがあります。
+switched multiprotocolを使用したGecko Bootloaderを使用する方法の詳細については、「UG266 : Silicon Labs Gecko Bootloader User Guide」および「UG267 : Multiprotocol User Guide」を参照してください。
+
 ** アプリケーション開発を始める
   Bluetoothアプリケーションの開発は、GATTデータベース構造の定義と、
   connection_opened、connection_closedなどのイベントのイベントハンドラの定義という
@@ -62,6 +77,7 @@ Bluetooth Software API Reference Manualにあります。
 Simplicity IDEパースペクティブの左上隅にある[デバッグ]をクリックします。
 プロジェクトをビルドしてダウンロードし、Debugパースペクティブを開きます。 
 [再生]クリックして、デバイスでプロジェクトを実行します。
+
 * The GATT Editor
 すべてのBluetooth接続は、GATTクライアントとGATTサーバがあります。
 サーバーはGATTデータベースを保持しています：クライアントが読み書きできる特性の集合。
