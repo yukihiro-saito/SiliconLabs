@@ -548,7 +548,9 @@ ECDH（Elliptical Curve Diffie Hellman）キー交換アルゴリズムの導入
 |           |               | Authenti-      |                |             | Authenti-      |
 |           |               | cated          |                |             | cated          | 
 
-  
+** Encryption
+Bluetooth LE 技術は、暗号化にAES-CCM暗号を使用し、暗号化はBluetooth LE コントローラによって実行されます。
+この暗号化機能は、FIPS-1971で定義されているAES-128ビットブロックサイファーを使用して128ビット暗号化を生成します。
 
 
 
