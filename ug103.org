@@ -561,5 +561,8 @@ Bluetooth LE 技術は、一定期間にわたってBluetooth LE デバイスを
 Bluetooth 4.0および4.1規格では、プライベートアドレスが解決され、ホストで生成されます。
 Bluetooth 4.2以降の標準では、プライベートアドレスが解決され、ホストを介さずにコントローラで生成されます。
 
-
-
+* Next Steps
+さまざまな環境でBluetoothソフトウェア開発を開始する方法については、
+「QSG108：Silicon LabsBluetooth®ソフトウェア入門」を参照してください。
+Simplicity Studio IDEおよびその他のツールを使用して開発を開始するために必要なツールとSDKをインストールする方法については、
+QSG139：Simplicity StudioによるBluetooth開発を参照してください。
