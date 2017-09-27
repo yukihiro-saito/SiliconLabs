@@ -71,7 +71,7 @@ GATTデータベース内の特性の値を読み書きすることができま�
 メインループにイベントハンドラがあります。
 他のイベントハンドラでこのリストを拡張することができます。
 イベントの全リストとスタックコマンドは、
-Bluetooth Software API Reference Manualにあります。
+/Bluetooth Software API Reference Manual/ にあります。
 
 プロジェクトをビルドしてデバッグするには、
 Simplicity IDEパースペクティブの左上隅にある[デバッグ]をクリックします。
