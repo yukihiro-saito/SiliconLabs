@@ -469,4 +469,86 @@ LEセキュア接続と数値比較ペアリング方法は、Bluetooth 4.2以�
 それらを追跡するためにデバイスにそのアドレスを関連付けることが可能である。
 Bluetooth Low Energy技術のプライバシー機能と頻繁に変化するアドレスは、トラッキングから保護するために使用できます。
 
+** Pairing and Bonding
+Bluetoothペアリングは、関連する関係者が信頼関係を設定し、データ交換に使用される暗号化キーを生成するために、
+自分の識別情報を交換するプロセスです。
+Bluetooth Low Energy技術は、アプリケーションのセキュリティ要件に応じて、ペアリングのための複数のオプションを提供します。
+Bluetooth Low Energy標準バージョン4.0および4.1は、ユーザーがデバイスの入出力機能に基づいて、
+Just Works、Passkey EntryおよびOut-of Bandメカニズムから1つの方法を選択できるSecure Simple Pairingモデルを使用します。
+BluetoothのLow Energy標準バージョン4.2のセキュリティは、新しいLEセキュア接続のペアリングモデル、数値比較方法の追加、
+ECDH（Elliptical Curve Diffie Hellman）キー交換アルゴリズムの導入によって強化されています。
+以下の表は、それらのサポートされているI/O機能（BLUETOOTH仕様バージョン4.2 [VOL 1、パートA] 5.4.1アソシエーションモデル）に応じて
+両当事者の間で使用することができるアソシエーションモデルを要約します。
+ペアリングという用語は、セキュリティキーの生成と交換を意味し、
+ボンディングという用語はセキュリティキーの格納を指し、後で使用することができます。
+
+|           |              |                | Initiator      |                  |                  |
+|-----------+--------------+----------------+----------------+------------------+------------------|
+| Responder | Display Only | Display YesNo  | Keyboard Only  | NoInput NoOutput | Keyboard Dsiplay |
+|-----------+--------------+----------------+----------------+------------------+------------------|
+| Display   | Just Works   | Just Works     | Psskey         | Just Works       | Passkey          |
+| Only      | Unauthenti-  | Unauthenti-    | Entry:         | Unauthenti-      | Entry:           |
+|           | cated        | cated          | responder      | cated            | responder        |
+|           |              |                | displays, ini- |                  | displays, ini-   |
+|           |              |                | tiator inputs  |                  | tiator inputs    |
+|           |              |                | Authenti-      |                  | Authenti-        |
+|           |              |                | cated          |                  | cated            |
+|-----------+--------------+----------------+----------------+------------------+------------------|
+| Display   | Just Works   | Just Works     | Psskey         | Just Works       | Psskey           |
+| YesNo     | Unauthenti-  | (For LE Legacy | Entry:         | Unauthenti-      | Entry(For        |
+|           | cated        | Pairing)       | responder      | cated            | LE Legacy        |
+|           |              | Unauthenti-    | displays ini-  |                  | Pairing):        |
+|           |              | cated          | tiator inputs  |                  | responder        |
+|           |              |                | Authenti-      |                  | displays, ini-   |
+|           |              |                | cated          |                  | tiator inputs    |
+|           |              |                |                |                  | Authenti-        |
+|           |              |                |                |                  | cated            |
+|-----------+--------------+----------------+----------------+------------------+------------------|
+|           |              | Numeric        |                |                  | Numeric          |
+|           |              | Comparison     |                |                  | Comparison       |
+|           |              | (For LE        |                |                  | (For LE          |
+|           |              | Secure Con-    |                |                  | Secure Con-      |
+|           |              | nections)      |                |                  | nections)        |
+|           |              | Authenti-      |                |                  | Authenti-        |
+|           |              | cated          |                |                  | cated            |
+
+|           | Initiator     |                |                |             |                |
+|-----------+---------------+----------------+----------------+-------------+----------------|
+| Responder | DisplayOnly   | Display        | Keyboard       | NoInput     | Keyboard       |
+|           |               | YesNo          | Only           | NoOutput    | Display        |
+|-----------+---------------+----------------+----------------+-------------+----------------|
+| Keyboard  | Psskey        | Psskey         | Passkey        | Just Works  | Passkey        |
+| Only      | Entry:initia- | Entry:initia-  | Entry:initia-  | Unauthenti- | Entry:initia-  |
+|           | tor displays, | tor displays,  | tor and        | cated       | tor displays,  |
+|           | responder     | responder      | responder      |             | responder      |
+|           | inputs        | inputs         | inputs         |             | inputs         |
+|           | Authenti-     | Authenti-      | Authenti-      |             | Authenti-      |
+|           | cated         | cated          | cated          |             | cated          |
+|-----------+---------------+----------------+----------------+-------------+----------------|
+| NoInput   | Just Works    | Just Works     | Just Works     | Just Works  | Just Works     |
+| NoOutput  | Unauthenti-   | Unauthenti-    | Unauthenti-    | Unauthenti- | Unauthenti-    |
+|           | cated         | cated          | cated          | cated       | cated          |
+|-----------+---------------+----------------+----------------+-------------+----------------|
+| Keyboard  | Passkey       | Passkey        | Passkey        | Just Works  | Passkey        |
+| Display   | Entry:initia- | Entry(For      | Entry:         | Unauthenti- | Entry(For      |
+|           | tor displays, | LE Legacy      | responder      | cated       | LE Legacy      |
+|           | responder     | Pairing):      | displays, ini- |             | Pairing):      |
+|           | inputs        | initiator dis- | tiator inputs  |             | initiator dis- |
+|           | Authenti-     | plays,         | Authenti-      |             | plays,         |
+|           | cated         | responder      | cated          |             | responder      |
+|           |               | inputs         |                |             | inputs         |
+|           |               | Authenti-      |                |             | Authenti-      |
+|           |               | cated          |                |             | cated          |
+|-----------+---------------+----------------+----------------+-------------+----------------|
+|           |               | Numeric        |                |             | Numeric        |
+|           |               | Comparison     |                |             | Comparison     |
+|           |               | (For LE        |                |             | (For LE        |
+|           |               | Secure Con-    |                |             | Secure Con-    |
+|           |               | nections)      |                |             | nections)      |
+|           |               | Authenti-      |                |             | Authenti-      |
+|           |               | cated          |                |             | cated          | 
+
+  
+
+
 
