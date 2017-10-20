@@ -1,0 +1,119 @@
+#+OPTIONS: ^:nil
+このドキュメントには、Silicon Labs Bluetooth Smart Softwareバージョン2.4.0の全APIリファレンスが含まれています。
+Silicon LabsのBluetooth SmartチップセットのBlue Geckoファミリは、小型フォームファクタパッケージに統合された、
+高性能、低エネルギー、使いやすいBluetooth Smartソリューションを提供します。
+Silicon Labsのエネルギーに優しい32ビットMCUの超低消費電力動作モードと高速ウェイクアップ時間は、
+Bluetooth無線の低い送信および受信電力消費と相まって、バッテリ駆動アプリケーションに最適化されたソリューションになります。
+
+* Data types
+ドキュメントで使用されているデータ型は、次の表のとおりです。
+特記のない限り、すべてのマルチバイトフィールドはリトルエンディアン形式です。
+
+insert table
+
+* API Reference
+このセクションでは、すべてのコマンド、列挙、応答、イベント、およびエラーについて説明します。
+関連する列挙型、応答、およびイベントを持つコマンドは、コマンドクラスに従ってグループ化されます。
+
+*BGAPI Payload*
+BGAPIコマンド、応答、またはイベントのパラメータは、ペイロード内のアプリケーションとファームウェアの間で受け渡されます。例えば、uint32型のパラメータは4バイトのペイロード領域を使用します。バイト配列パラメータは1バイトを使用して配列の長さを記述し、配列内の実際のデータは残りの空きペイロード領域にコピーされます。
+
+*Maximum BGAPI Payload Size*
+最大BGAPIペイロードサイズは、NCPモードとSoCモードの両方で256バイトです。
+アプリケーションがBGAPIコマンドを呼び出すと、BGAPIはペイロードの長さをチェックし、
+ペイロードによってオーバーフローが発生するとエラーコード0x018a（command_too_long）を返します。
+
+*Deprecation Notice*
+いくつかのコマンド、列挙およびイベントは非推奨としてマークされていることに注意してください。
+これらのコマンドの使用はお勧めできません。今後のリリースでは削除される予定です。
+
+** Device Firmware Upgrade (dfu)
+
+*** dfu commands
+
+**** cmd_dfu_flash_set_address
+**** cmd_dfu_flash_upload
+**** cmd_dfu_flash_upload_finish
+**** cmd_dfu_reset
+
+*** dfu events
+**** evt_dfu_boot
+**** evt_dfu_boot_failure
+
+** Endpoint (endpoint)
+*** endpoint commands
+**** cmd_endpoint_close
+**** cmd_endpoint_read_counters
+**** cmd_endpoint_send
+**** cmd_endpoint_set_streaming_destination
+
+*** endpoint events
+**** evt_endpoint_data
+**** evt_endpoint_status
+**** evt_endpoint_syntax_error
+
+*** endpoint enumerations
+**** enum_endpoint_types
+
+*** endpoint defines
+**** define_endpoint_endpoint_flags
+
+** Persistent Store (flash)
+*** flash commands
+**** cmd_flash_ps_dump
+**** cmd_flash_ps_erase
+**** cmd_flash_ps_erase_all
+**** cmd_flash_ps_load
+**** cmd_flash_ps_save
+
+*** flash events
+**** evt_flash_ps_key
+
+** Generic Attribute Profile (gatt)
+
+** Generic Attribute Profile Server (gatt_server)
+
+** Hardware (hardware)
+
+** Connection management for low energy (le_connection)
+
+** Generic Access Profile, Low Energy (le_gap)
+このクラスのコマンドとイベントは、Bluetooth Low Energy（LE）のGeneric Access Profile（GAP）に関連しています。
+*** le_gap commands
+**** cmd_le_gap_bt5_set_adv_data
+**** cmd_le_gap_bt5_set_adv_parameters
+**** cmd_le_gap_bt5_set_mode
+**** cmd_le_gap_discover
+**** cmd_le_gap_end_procedure
+**** cmd_le_gap_open
+**** cmd_le_gap_set_adv_data
+**** cmd_le_gap_set_adv_parameters
+**** cmd_le_gap_set_adv_timeout
+**** cmd_le_gap_set_conn_parameters
+**** cmd_le_gap_set_mode
+このコマンドを使用すると、現在のBluetooth LE GAP ConnectableモードとDiscoverableモードを設定できます。
+advertisementsを有効にしたり、着信接続を許可するために使用できます。
+このモードを終了するには（advertisingを停止する、および/または着信接続を許可しない）、
+Not Discoverable / Not Connectableパラメーター値を指定してこのコマンドを発行します。
+コマンドはすぐに有効になります。
+現在設定されているパラメータを新しいモードで使用できない場合、エラーが返されます。
+advertisementをuser_dataモードで有効にする場合は、このコマンドを発行する前にle_gap_set_adv_dataを使用してadvertisementを設定し、
+応答データをスキャンする必要があります。
+advertisementがuser_data以外のモードで有効になっている場合、
+advertisementおよびスキャン応答データは、次の手順を使用してスタックによって生成されます。
+1.広告データにFlagsフィールドを追加します。
+2. TX power サービスがローカルGATTデータベースに存在する場合、advertisementデータにTX power レベルフィールドを追加する。
+3. GAP周辺優先接続パラメータ特性がローカルGATTデータベースに存在する場合は、スレーブ接続間隔範囲フィールドをadvertisementデータに追加します。
+4.アドバタイズする1つまたは複数の16ビットサービスUUIDがある場合、16ビットのサービスUUIDのリストを
+advertisementデータに追加します。advertiseされたすべての16ビットUUIDがadvertisementデータに含まれている場合、
+リストは完了です。それ以外の場合、リストは不完全です。
+5.アドバタイズする1つまたは複数の128ビットサービスUUIDがあり、このフィールドにまだ空き領域がある場合、
+advertisementデータに128ビットのサービスUUIDのリストを追加します。
+宣言されたすべての128ビットUUIDがadvertisementデータに含まれている場合、リストは完了です。
+それ以外の場合、リストは不完全です。
+advertisementデータパケットは、最大でも1つの128ビットサービスUUIDを含むことができることに注意してください。
+6.デバイスがプライバシーモードでない場合は、advertisementデータに完全なローカル名を追加してください。
+完全なローカル名が残りの空き領域に収まらない場合は、空き領域が6バイト以上ある場合は、advertisement名を省略して短縮します。
+それ以外の場合は、レスポンスデータをスキャンするためにローカル名が追加されます。
+
+接続の数が設定されたmax_connections値に達した場合、このコマンドは "Connection Limit Exceeded"エラーで失敗します。
