@@ -84,6 +84,9 @@ BGAPIコマンド、応答、またはイベントのパラメータは、ペイ
 **** cmd_le_gap_bt5_set_adv_parameters
 **** cmd_le_gap_bt5_set_mode
 **** cmd_le_gap_discover
+このコマンドを使用すると、GAP discovery 手順を開始して、advertising デバイスをスキャンする、つまりデバイスを検出することができます。
+このコマンドを発行する前に、スキャンパラメータをle_gap_set_scan_parametersコマンドで設定することができます。
+進行中の検出プロセスをキャンセルするには、le_gap_end_procedureコマンドを使用します。
 **** cmd_le_gap_end_procedure
 **** cmd_le_gap_open
 **** cmd_le_gap_set_adv_data
